@@ -60,6 +60,7 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 npm run dev
 ```
 The frontend will be available at `http://localhost:5173`.
