@@ -1,0 +1,180 @@
+CAMPUS RUNNER V1.0 - MASTER PROJECT
+SPECIFICATION
+Project Name
+Campus Runner
+Tagline
+Someone's already going. Let them bring yours too.
+Project Overview
+Campus Runner is a peer-to-peer parcel pickup and delivery platform for college campuses.
+Students who are already visiting the campus parcel collection center can earn money by collecting and
+delivering parcels for other students.
+The platform acts as a trusted marketplace between parcel owners and student runners.
+Primary Goals
+Reduce inconvenience for students who cannot visit the parcel center .
+Allow students to earn money by delivering parcels.
+Create a secure and trusted delivery ecosystem.
+Support both prepaid and COD orders.
+Provide transparent ratings and reputation.
+User Roles
+Student User
+A single user account can act as:
+Parcel Owner
+Runner
+No separate account types.1. 
+2. 
+3. 
+4. 
+5. 
+• 
+• 
+1Authentication
+Login Method
+Mobile Number + OTP
+Flow:
+Enter Mobile Number
+↓
+Receive OTP
+↓
+Verify OTP
+↓
+Complete Profile (First Login Only)
+User Profile Fields
+Full Name
+Registration Number
+Phone Number
+Hostel
+Room Number
+Profile Photo (Optional)
+Created At
+Dashboard Entry
+After login:
+2What would you like to do today?
+Need a Parcel Delivered
+Earn by Delivering Parcels
+Request Creation
+Fields:
+Courier Company
+Tracking Number
+Pickup Location
+Hostel
+Room Number
+Order Type
+Prepaid
+COD
+COD Amount (If Applicable)
+Reward Offered
+Minimum Reward = ₹20
+Maximum Reward = ₹100
+Parcel Notes (Optional)
+Platform Fees
+Prepaid
+Platform Fee = 10% of Reward
+Example:
+Reward ₹50
+Platform Fee ₹51. 
+2. 
+• 
+• 
+3Total ₹55
+COD
+Platform Fee = 10% Reward + ₹10
+Example:
+COD ₹700
+Reward ₹50
+Platform Fee ₹15
+Total ₹765
+Payment Gateway
+Razorpay
+Request should only be created after successful payment.
+Request Lifecycle
+OPEN
+↓
+ACCEPTED
+↓
+PICKED_UP
+↓
+OUT_FOR_DELIVERY
+↓
+OTP_VERIFICATION
+↓
+4COMPLETED
+Alternative:
+OPEN
+↓
+CANCELLED
+Runner Flow
+Browse Open Requests
+View Owner Reputation
+Accept Request
+Collect Parcel
+Mark Picked Up
+Mark Out For Delivery
+Enter OTP
+Complete Delivery
+OTP Verification
+Generate 4-digit OTP at request creation.
+Store hashed OTP.
+Owner provides OTP during delivery.
+Runner enters OTP.
+Correct OTP completes request.
+Reputation System
+Every user has:
+Owner Rating
+Runner Rating
+Owner Success Rate1. 
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+5Runner Success Rate
+Completed Deliveries
+Completed Receipts
+Rating System
+Owner rates Runner
+1-5 stars
+Comment
+Runner rates Owner
+1-5 stars
+Comment
+Public User Profile
+Name
+Verified Student Badge
+Owner Rating
+Runner Rating
+Owner Success Rate
+Runner Success Rate
+Completed Deliveries
+Member Since
+Admin Features
+User Management
+6Request Management
+Payment Monitoring
+Revenue Analytics
+Dispute Resolution
+User Suspension
+MVP Deliverables
+Mobile OTP Login
+Profile Management
+Request Creation
+Razorpay Integration
+Request Acceptance
+Status Tracking
+OTP Verification
+Payment Settlement
+Ratings & Reviews
+Reputation System
+Admin Dashboard
+Future Versions (Not MVP)
+Wallet
+AI Matching
+Fraud Detection
+Push Notifications
+Referral System
+7Multi-Campus Expansion
+Route Optimization
+Demand Prediction
+Campus Heatmap
+8

@@ -1,0 +1,48 @@
+CAMPUS RUNNER - RECOMMENDED FILE
+STRUCTURE
+campus-runner/
+├── frontend/ │ ├── backend/ │ ├── docs/ │ ├── database/ │ ├── deployment/ │ └──
+README.md
+FRONTEND
+frontend/
+src/
+├── assets/ │ ├── components/ │ ├── Navbar/ │ ├── Footer/ │ ├── RequestCard/ │
+├── RatingCard/ │ ├── OTPModal/ │ ├── ProfileCard/ │ └── StatusBadge/ │ ├── pages/
+│ ├── Login/ │ ├── Dashboard/ │ ├── CreateRequest/ │ ├── RequestDetails/ │ ├──
+RunnerRequests/ │ ├── MyRequests/ │ ├── Payments/ │ ├── Profile/ │ └── Admin/ │
+├── services/ │ ├── api.js │ ├── auth.js │ ├── requestService.js │ ├── paymentService.js
+│ └── reviewService.js │ ├── context/ │ ├── AuthContext.jsx │ └── UserContext.jsx │
+├── routes/ │ └── AppRoutes.jsx │ ├── hooks/ │ ├── utils/ │ ├── App.jsx │ └──
+main.jsx
+BACKEND
+backend/
+app/
+├── main.py │ ├── config/ │ ├── settings.py │ └── constants.py │ ├── database/ │
+├── connection.py │ └── base.py │ ├── models/ │ ├── user .py │ ├── request.py │
+├── payment.py │ ├── review.py │ └── admin.py │ ├── schemas/ │ ├── user .py │ ├──
+request.py │ ├── payment.py │ └── review.py │ ├── routes/ │ ├── auth.py │ ├──
+requests.py │ ├── payments.py │ ├── reviews.py │ ├── profile.py │ └── admin.py │ ├──
+services/ │ ├── otp_service.py │ ├── payment_service.py │ ├── request_service.py │ ├──
+review_service.py │ └── reputation_service.py │ ├── middleware/ │ ├── auth.py │ └──
+rate_limit.py │ ├── utils/ │ ├── jwt.py │ ├── security.py │ └── helpers.py │ └── tests/
+DATABASE TABLES
+users
+requests
+1payments
+reviews
+otp_logs
+admin_logs
+DOCS
+docs/
+PRD.md
+DATABASE_SCHEMA.md
+API_DOCUMENTATION.md
+WORKFLOW.md
+DEPLOYMENT_GUIDE.md
+DEPLOYMENT
+deployment/
+docker-compose.yml
+Dockerfile.backend
+Dockerfile.frontend
+nginx.conf
+2
