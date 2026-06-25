@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { verifyOTP } from "../services/auth";
+import { verifyOTP, adminLogin } from "../services/auth";
 import { apiCall } from "../services/api";
 
 const AuthContext = createContext(null);
@@ -52,11 +52,26 @@ export function AuthProvider({ children }) {
     localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
+  const handleAdminLogin = async (email, password) => {
+    try {
+      const response = await adminLogin(email, password);
+      setToken(response.token);
+      setUser(response.user);
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      return response.user;
+    } catch (error) {
+      console.error("Admin login failed:", error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     token,
     loading,
     login: handleLogin,
+    adminLogin: handleAdminLogin,
     logout: handleLogout,
     updateProfile,
   };

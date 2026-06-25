@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createPaymentOrder, openRazorpayCheckout } from "../../services/paymentService";
-import { createRequest } from "../../services/requestService";
-import { Package, MapPin, IndianRupee, HelpCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { createRequest, uploadImage } from "../../services/requestService";
+import { Package, MapPin, IndianRupee, HelpCircle, ArrowLeft, CheckCircle2, UploadCloud, X } from "lucide-react";
+import "./CreateRequest.css";
 
 export default function CreateRequest() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   // Form states
   const [courier, setCourier] = useState("");
@@ -19,6 +21,11 @@ export default function CreateRequest() {
   const [codAmount, setCodAmount] = useState(0.0);
   const [reward, setReward] = useState(30.0);
   const [notes, setNotes] = useState("");
+  
+  // Image states
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
   // Calculation states
   const [platformFee, setPlatformFee] = useState(3.0);
@@ -47,6 +54,49 @@ export default function CreateRequest() {
     setTotalAmount(total);
   }, [reward, orderType, codAmount]);
 
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  const handleFile = (file) => {
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload an image file.");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setError("");
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -59,6 +109,12 @@ export default function CreateRequest() {
     }
 
     try {
+      let uploadedImageUrl = null;
+      if (imageFile) {
+        const uploadRes = await uploadImage(imageFile);
+        uploadedImageUrl = uploadRes.url;
+      }
+
       // Step 1: Create Razorpay Order on Server
       const orderData = await createPaymentOrder(reward, orderType, codAmount);
 
@@ -71,7 +127,8 @@ export default function CreateRequest() {
           try {
             const requestResult = await createRequest({
               courier_company: courier,
-              tracking_number: trackingNum,
+              tracking_number: trackingNum || null,
+              tracking_image_url: uploadedImageUrl,
               pickup_location: pickupLoc,
               hostel: hostel,
               room_number: roomNumber,
@@ -104,63 +161,35 @@ export default function CreateRequest() {
 
   if (createdOTP) {
     return (
-      <div style={{
-        maxWidth: "480px",
-        margin: "4rem auto",
-        padding: "0 1rem"
-      }}>
-        <div style={{
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-color)",
-          borderRadius: "20px",
-          padding: "2.5rem 2rem",
-          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4)",
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.5rem"
-        }}>
-          <div style={{ display: "flex", justifyContent: "center", color: "#22c55e" }}>
-            <CheckCircle2 size={56} />
+      <div className="success-screen">
+        <div className="success-card">
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <CheckCircle2 size={72} className="success-icon" />
           </div>
           <div>
-            <h3 style={{ margin: "0 0 6px 0", fontSize: "1.5rem", fontWeight: "700", color: "var(--text-primary)" }}>
+            <h3 className="success-title">
               Request Paid & Created!
             </h3>
-            <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+            <p className="success-desc">
               Your delivery request is now OPEN. A runner will accept it shortly.
             </p>
           </div>
 
-          <div style={{
-            background: "rgba(15, 23, 42, 0.5)",
-            padding: "1.5rem",
-            borderRadius: "12px",
-            border: "1px solid var(--border-color)"
-          }}>
-            <span style={{ fontSize: "0.75rem", textTransform: "uppercase", color: "var(--text-secondary)", letterSpacing: "0.05em", display: "block", marginBottom: "8px" }}>
+          <div className="otp-box">
+            <span className="otp-label">
               Your 4-Digit Delivery OTP
             </span>
-            <span style={{ fontSize: "2.5rem", fontWeight: "800", color: "var(--primary-color)", letterSpacing: "0.1em" }}>
+            <span className="otp-value">
               {createdOTP}
             </span>
-            <p style={{ margin: "10px 0 0 0", fontSize: "0.75rem", color: "#a855f7" }}>
+            <p className="otp-hint">
               Provide this code to the runner when they deliver your parcel.
             </p>
           </div>
 
           <button
             onClick={() => navigate("/dashboard")}
-            style={{
-              background: "var(--primary-color)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "12px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "background 0.2s"
-            }}
+            className="submit-btn"
           >
             Go to Dashboard
           </button>
@@ -170,41 +199,25 @@ export default function CreateRequest() {
   }
 
   return (
-    <div style={{
-      maxWidth: "640px",
-      margin: "0 auto",
-      padding: "2rem 1rem"
-    }}>
-      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "1.5rem" }}>
+    <div className="create-request-container">
+      <div className="create-request-header">
         <button
           onClick={() => navigate(-1)}
-          style={{
-            background: "none", border: "none",
-            color: "var(--text-secondary)", cursor: "pointer",
-            display: "flex", alignItems: "center", padding: "4px"
-          }}
+          className="back-button"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={24} />
         </button>
-        <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "800", color: "var(--text-primary)" }}>
+        <h2 className="create-request-title">
           Request a Delivery
         </h2>
       </div>
 
-      <div style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-color)",
-        borderRadius: "20px",
-        padding: "2rem",
-        boxShadow: "0 10px 35px rgba(0, 0, 0, 0.3)",
-        backdropFilter: "blur(10px)"
-      }}>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <div className="create-request-card">
+        <form onSubmit={handleSubmit} className="form-layout">
           
-          {/* Grid fields */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }} className="form-grid">
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">
                 Courier Company
               </label>
               <input
@@ -212,42 +225,61 @@ export default function CreateRequest() {
                 placeholder="e.g. DTDC, Amazon, BlueDart"
                 value={courier}
                 onChange={(e) => setCourier(e.target.value)}
-                style={{
-                  padding: "10px 12px",
-                  background: "rgba(15, 23, 42, 0.4)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  color: "var(--text-primary)",
-                  outline: "none"
-                }}
+                className="form-input"
                 required
               />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
-                Tracking Number
+            <div className="form-group">
+              <label className="form-label">
+                Tracking Number (Optional)
               </label>
               <input
                 type="text"
                 placeholder="Enter tracking ID"
                 value={trackingNum}
                 onChange={(e) => setTrackingNum(e.target.value)}
-                style={{
-                  padding: "10px 12px",
-                  background: "rgba(15, 23, 42, 0.4)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  color: "var(--text-primary)",
-                  outline: "none"
-                }}
-                required
+                className="form-input"
               />
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+          <div className="form-group">
+            <label className="form-label">Tracking Screenshot (Optional)</label>
+            <div 
+              className={`file-upload-area ${dragActive ? "drag-active" : ""}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => !imagePreview && fileInputRef.current && fileInputRef.current.click()}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileChange} 
+                accept="image/*" 
+                style={{ display: "none" }} 
+              />
+              
+              {imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="Tracking preview" className="image-preview" />
+                  <button type="button" onClick={removeImage} className="remove-image-btn" aria-label="Remove image">
+                    <X size={16} />
+                  </button>
+                </>
+              ) : (
+                <div className="file-upload-content">
+                  <UploadCloud size={40} className="file-upload-icon" />
+                  <span>Drag & Drop an image here, or <strong>click to browse</strong></span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
               Pickup Location Center
             </label>
             <input
@@ -255,22 +287,14 @@ export default function CreateRequest() {
               placeholder="e.g. Main Post Office Hub, North Gate Collection Center"
               value={pickupLoc}
               onChange={(e) => setPickupLoc(e.target.value)}
-              style={{
-                padding: "10px 12px",
-                background: "rgba(15, 23, 42, 0.4)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "8px",
-                color: "var(--text-primary)",
-                outline: "none"
-              }}
+              className="form-input"
               required
             />
           </div>
 
-          {/* Delivery Location Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }} className="form-grid">
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">
                 Drop Hostel
               </label>
               <input
@@ -278,20 +302,13 @@ export default function CreateRequest() {
                 placeholder="e.g. Raman Hostel"
                 value={hostel}
                 onChange={(e) => setHostel(e.target.value)}
-                style={{
-                  padding: "10px 12px",
-                  background: "rgba(15, 23, 42, 0.4)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  color: "var(--text-primary)",
-                  outline: "none"
-                }}
+                className="form-input"
                 required
               />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+            <div className="form-group">
+              <label className="form-label">
                 Room Number
               </label>
               <input
@@ -299,39 +316,21 @@ export default function CreateRequest() {
                 placeholder="e.g. A-101"
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
-                style={{
-                  padding: "10px 12px",
-                  background: "rgba(15, 23, 42, 0.4)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  color: "var(--text-primary)",
-                  outline: "none"
-                }}
+                className="form-input"
                 required
               />
             </div>
           </div>
 
-          {/* Order Type Toggle */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+          <div className="form-group">
+            <label className="form-label">
               Order Type
             </label>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="order-type-toggle">
               <button
                 type="button"
                 onClick={() => setOrderType("PREPAID")}
-                style={{
-                  flex: 1,
-                  background: orderType === "PREPAID" ? "rgba(56, 189, 248, 0.1)" : "rgba(15, 23, 42, 0.2)",
-                  border: orderType === "PREPAID" ? "1px solid #38bdf8" : "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  color: orderType === "PREPAID" ? "#38bdf8" : "var(--text-secondary)",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
+                className={`toggle-btn ${orderType === "PREPAID" ? "active-prepaid" : ""}`}
               >
                 Prepaid Collection
               </button>
@@ -339,17 +338,7 @@ export default function CreateRequest() {
               <button
                 type="button"
                 onClick={() => setOrderType("COD")}
-                style={{
-                  flex: 1,
-                  background: orderType === "COD" ? "rgba(234, 179, 8, 0.1)" : "rgba(15, 23, 42, 0.2)",
-                  border: orderType === "COD" ? "1px solid #eab308" : "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  color: orderType === "COD" ? "#eab308" : "var(--text-secondary)",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
+                className={`toggle-btn ${orderType === "COD" ? "active-cod" : ""}`}
               >
                 Cash on Delivery (COD)
               </button>
@@ -357,8 +346,8 @@ export default function CreateRequest() {
           </div>
 
           {orderType === "COD" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+            <div className="form-group">
+              <label className="form-label">
                 COD Amount to Pay Center (₹)
               </label>
               <input
@@ -368,14 +357,7 @@ export default function CreateRequest() {
                 placeholder="Enter COD amount in Rupees"
                 value={codAmount}
                 onChange={(e) => setCodAmount(e.target.value)}
-                style={{
-                  padding: "10px 12px",
-                  background: "rgba(15, 23, 42, 0.4)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  color: "var(--text-primary)",
-                  outline: "none"
-                }}
+                className="form-input"
                 required
               />
               <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
@@ -384,13 +366,12 @@ export default function CreateRequest() {
             </div>
           )}
 
-          {/* Reward Input */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+          <div className="form-group">
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+              <label className="form-label">
                 Reward Offered to Runner (₹)
               </label>
-              <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "#22c55e" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "var(--primary-color)" }}>
                 ₹{reward}
               </span>
             </div>
@@ -401,94 +382,60 @@ export default function CreateRequest() {
               step="5"
               value={reward}
               onChange={(e) => setReward(e.target.value)}
-              style={{
-                width: "100%",
-                accentColor: "var(--primary-color)",
-                cursor: "pointer"
-              }}
+              className="reward-slider"
             />
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: "var(--text-secondary)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
               <span>Min: ₹20</span>
               <span>Max: ₹100</span>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--text-primary)" }}>
+          <div className="form-group">
+            <label className="form-label">
               Parcel Notes (Optional)
             </label>
             <textarea
               placeholder="e.g. Fragile items, deliver after 5 PM, or specific gates info."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              style={{
-                padding: "10px 12px",
-                background: "rgba(15, 23, 42, 0.4)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "8px",
-                color: "var(--text-primary)",
-                fontFamily: "inherit",
-                resize: "none",
-                outline: "none"
-              }}
+              className="form-input form-textarea"
             />
           </div>
 
-          <hr style={{ border: 0, borderTop: "1px solid var(--border-color)", margin: "0.5rem 0" }} />
-
-          {/* Calculations Review Block */}
-          <div style={{
-            background: "rgba(15, 23, 42, 0.5)",
-            padding: "1rem 1.25rem",
-            borderRadius: "12px",
-            border: "1px solid var(--border-color)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-            fontSize: "0.875rem"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-secondary)" }}>Delivery Reward Payout:</span>
-              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>₹{reward}</span>
+          <div className="calculations-block">
+            <div className="calc-row">
+              <span>Delivery Reward Payout:</span>
+              <span className="calc-value">₹{reward}</span>
             </div>
             
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "4px" }}>
+            <div className="calc-row">
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <span>Platform Service Fee:</span>
-                <HelpCircle size={12} title="10% platform fee. Extra ₹10 processing fee for COD orders." style={{ cursor: "help" }} />
+                <HelpCircle size={14} title="10% platform fee. Extra ₹10 processing fee for COD orders." style={{ cursor: "help" }} />
               </span>
-              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>₹{platformFee}</span>
+              <span className="calc-value">₹{platformFee}</span>
             </div>
 
             {orderType === "COD" && (
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--text-secondary)" }}>COD Parcel Price:</span>
-                <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>₹{codAmount}</span>
+              <div className="calc-row">
+                <span>COD Parcel Price:</span>
+                <span className="calc-value">₹{codAmount}</span>
               </div>
             )}
 
-            <hr style={{ border: 0, borderTop: "1px dashed var(--border-color)", margin: "4px 0" }} />
+            <hr className="calc-divider" />
 
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1rem", fontWeight: "700" }}>
-              <span style={{ color: "var(--text-primary)" }}>Total Amount to Pay:</span>
-              <span style={{ color: "#22c55e", display: "flex", alignItems: "center" }}>
-                <IndianRupee size={14} />
+            <div className="calc-row calc-total">
+              <span>Total Amount to Pay:</span>
+              <span className="calc-total-value">
+                <IndianRupee size={18} />
                 <span>{totalAmount}</span>
               </span>
             </div>
           </div>
 
           {error && (
-            <div style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.2)",
-              color: "#ef4444",
-              padding: "12px",
-              borderRadius: "8px",
-              fontSize: "0.9rem",
-              fontWeight: "600"
-            }}>
+            <div className="error-message">
               {error}
             </div>
           )}
@@ -496,18 +443,7 @@ export default function CreateRequest() {
           <button
             type="submit"
             disabled={loading}
-            style={{
-              background: "var(--primary-color)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "12px",
-              fontWeight: "700",
-              fontSize: "1rem",
-              cursor: "pointer",
-              transition: "background 0.2s"
-            }}
-            className="btn-hover"
+            className="submit-btn"
           >
             {loading ? "Processing Payment..." : `Pay ₹${totalAmount} & Post`}
           </button>

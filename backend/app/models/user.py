@@ -27,4 +27,6 @@ class User(Base):
     completed_deliveries = Column(Integer, default=0)
     completed_receipts = Column(Integer, default=0)
     
+    wallet_balance = Column(Float, default=0.0)
+    
     created_at = Column(DateTime, default=datetime.utcnow)

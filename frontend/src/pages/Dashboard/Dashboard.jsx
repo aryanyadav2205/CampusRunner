@@ -8,6 +8,7 @@ import {
   Wallet, User, Settings, LogOut, ArrowRight, Plus, RefreshCw,
   Star, Sun, Moon, Send, Bike, Gift, ChevronRight
 } from "lucide-react";
+import RequestCard from "../../components/RequestCard/RequestCard";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -46,6 +47,15 @@ export default function Dashboard() {
     navigate("/login");
   };
 
+  const handleAccept = async (id) => {
+    try {
+      await acceptRequest(id);
+      loadData();
+    } catch (err) {
+      alert(err.message || "Failed to accept request");
+    }
+  };
+
   const firstName = user?.full_name?.split(" ")[0] || "User";
 
   // Compute stats
@@ -62,8 +72,8 @@ export default function Dashboard() {
     { icon: Package, label: "My Deliveries", path: "/requests/runs" },
     { icon: IndianRupee, label: "My Earnings", path: "/payments" },
     { icon: ClipboardList, label: "My Requests", path: "/requests/my" },
-    { icon: MessageSquare, label: "Messages", path: "#", badge: null },
-    { icon: Wallet, label: "Wallet", path: "#" },
+    { icon: MessageSquare, label: "Messages", path: "/messages", badge: null },
+    { icon: Wallet, label: "Wallet", path: "/wallet" },
   ];
 
   const bottomItems = [
@@ -293,17 +303,37 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Refer & Earn */}
-        <div className="dash-refer-card">
-          <div className="dash-refer-content">
-            <h3>Refer & Earn</h3>
-            <p>Invite your friends and earn exciting rewards!</p>
-          </div>
-          <button className="dash-refer-btn">
-            <Gift size={16} />
-            Invite Now <ArrowRight size={14} />
-          </button>
+        {/* Available Runs */}
+        <div className="dash-section-header" style={{ marginTop: "2rem" }}>
+          <h3>Available Runs</h3>
         </div>
+
+        {loading ? (
+          <div className="dash-empty">
+            <p>Loading available runs...</p>
+          </div>
+        ) : openRequests.length === 0 ? (
+          <div className="dash-empty">
+            <p>No available runs at the moment. Check back later!</p>
+          </div>
+        ) : (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "1.5rem",
+            marginBottom: "2rem"
+          }}>
+            {openRequests.map((req) => (
+              <RequestCard 
+                key={req.id} 
+                request={req} 
+                showAcceptButton={true} 
+                onAccept={handleAccept} 
+              />
+            ))}
+          </div>
+        )}
+
       </main>
     </div>
   );

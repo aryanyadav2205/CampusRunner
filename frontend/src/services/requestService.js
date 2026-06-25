@@ -35,3 +35,27 @@ export async function verifyDeliveryOTP(id, otpCode) {
 export async function cancelRequest(id) {
   return apiCall(`/requests/${id}/cancel`, "POST");
 }
+
+export async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const token = localStorage.getItem("token");
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch("http://localhost:8000/api/upload", {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.detail || "Image upload failed");
+  }
+
+  return data;
+}

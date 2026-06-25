@@ -17,6 +17,10 @@ class OTPVerifyRequest(BaseModel):
     email: str
     otp_code: str
 
+class AdminLoginRequest(BaseModel):
+    email: str
+    password: str
+
 class TokenResponse(BaseModel):
     token: str
     user: UserResponse
@@ -77,17 +81,62 @@ def verify_otp(payload: OTPVerifyRequest, db: Session = Depends(get_db)):
             )
         
         # Auto-register new user
-        is_first_user = db.query(User).count() == 0
         user = User(
             email=email,
             phone_number=phone_number,
-            is_admin=is_first_user
+            is_admin=False
         )
         db.add(user)
         db.commit()
         db.refresh(user)
         
+    # Lock admin option only to the specified emails
+    ADMIN_EMAILS = ["campusrunner4@gmail.com"]
+    if user.email in ADMIN_EMAILS and not user.is_admin:
+        user.is_admin = True
+        db.commit()
+    elif user.email not in ADMIN_EMAILS and user.is_admin:
+        user.is_admin = False
+        db.commit()
+        
     # Generate JWT — use email as the subject
+    token = create_access_token(data={"sub": user.email})
+    
+    return {
+        "token": token,
+        "user": UserResponse.model_validate(user)
+    }
+
+@router.post("/admin/login", response_model=TokenResponse)
+def admin_login(payload: AdminLoginRequest, db: Session = Depends(get_db)):
+    """
+    Dedicated password-based login for the platform administrator.
+    """
+    email = payload.email.strip().lower()
+    
+    # Hardcoded master credentials for admin
+    if email != "campusrunner4@gmail.com" or payload.password != "AryanRao@2205":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin credentials.")
+        
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user:
+        # Create the admin profile if it doesn't exist yet
+        user = User(
+            email=email,
+            phone_number="0000000000",
+            full_name="Platform Admin",
+            is_admin=True,
+            is_verified=True
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    elif not user.is_admin:
+        # Ensure they have admin rights
+        user.is_admin = True
+        db.commit()
+        
     token = create_access_token(data={"sub": user.email})
     
     return {

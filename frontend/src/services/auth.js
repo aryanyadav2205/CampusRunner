@@ -13,3 +13,10 @@ export async function verifyOTP(email, otpCode) {
     otp_code: otpCode,
   });
 }
+
+export async function adminLogin(email, password) {
+  return apiCall("/auth/admin/login", "POST", {
+    email: email,
+    password: password,
+  });
+}

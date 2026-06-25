@@ -4,6 +4,7 @@ from app.models.request import Request
 from app.models.payment import Payment
 from app.models.user import User
 from app.config.constants import RequestStatus, PaymentStatus, PLATFORM_FEE_PERCENT, COD_ADDITIONAL_FEE
+from app.models.wallet import WalletTransaction, TransactionType
 from app.utils.helpers import generate_numeric_otp
 from app.utils.security import hash_otp, verify_otp_hash
 from app.services.payment_service import verify_payment_signature
@@ -13,12 +14,13 @@ def create_request(
     db: Session,
     owner_id: int,
     courier_company: str,
-    tracking_number: str,
     pickup_location: str,
     hostel: str,
     room_number: str,
     order_type: str,
     reward_offered: float,
+    tracking_number: str = None,
+    tracking_image_url: str = None,
     notes: str = None,
     cod_amount: float = 0.0,
     razorpay_order_id: str = None,
@@ -66,6 +68,7 @@ def create_request(
         owner_id=owner_id,
         courier_company=courier_company,
         tracking_number=tracking_number,
+        tracking_image_url=tracking_image_url,
         pickup_location=pickup_location,
         hostel=hostel,
         room_number=room_number,
@@ -178,6 +181,27 @@ def verify_delivery_otp(db: Session, request_id: int, otp_code: str, runner_id: 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect OTP. Verification failed.")
 
     request.status = RequestStatus.COMPLETED
+
+    # Credit the runner's wallet with the reward offered
+    runner = db.query(User).filter(User.id == runner_id).first()
+    if runner:
+        # Avoid null values
+        if runner.wallet_balance is None:
+            runner.wallet_balance = 0.0
+            
+        reward = request.reward_offered or 0.0
+        runner.wallet_balance += reward
+        
+        # Log the transaction
+        transaction = WalletTransaction(
+            user_id=runner.id,
+            amount=reward,
+            transaction_type=TransactionType.CREDIT,
+            description=f"Earnings for delivery #{request.id}",
+            reference_id=f"REQ_{request.id}"
+        )
+        db.add(transaction)
+
     db.commit()
 
     # Refresh owner and runner reputation metrics

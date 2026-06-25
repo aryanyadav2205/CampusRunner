@@ -13,6 +13,9 @@ import MyRequests from "../pages/MyRequests/MyRequests";
 import Payments from "../pages/Payments/Payments";
 import Profile from "../pages/Profile/Profile";
 import Admin from "../pages/Admin/Admin";
+import AdminLogin from "../pages/AdminLogin/AdminLogin";
+import Wallet from "../pages/Wallet/Wallet";
+import Messages from "../pages/Messages/Messages";
 
 // Layout components
 import Navbar from "../components/Navbar/Navbar";
@@ -83,6 +86,7 @@ export default function AppRoutes() {
       {/* Public Routes */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* Dashboard — uses its own sidebar layout */}
       <Route path="/dashboard" element={
@@ -129,11 +133,23 @@ export default function AppRoutes() {
         </ProtectedRoute>
       } />
 
+      <Route path="/wallet" element={
+        <ProtectedRoute>
+          <Wallet />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/messages" element={
+        <ProtectedRoute>
+          <Messages />
+        </ProtectedRoute>
+      } />
+
       {/* Admin Protected Routes */}
       <Route path="/admin" element={
-        <ProtectedRoute adminOnly={true}>
+        <ProtectedRouteNoNav adminOnly={true}>
           <Admin />
-        </ProtectedRoute>
+        </ProtectedRouteNoNav>
       } />
 
       {/* Fallback */}

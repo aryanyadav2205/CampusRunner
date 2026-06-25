@@ -19,6 +19,19 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  React.useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [resendTimer]);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -39,10 +52,27 @@ export default function Login() {
 
     try {
       await sendOTP(email, phone);
-      setSuccessMsg("OTP sent! Check your email inbox.");
+      setSuccessMsg("OTP sent! Check your email inbox and spam folder.");
       setStep(2);
+      setResendTimer(30);
     } catch (err) {
       setError(err.message || "Failed to send OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendTimer > 0) return;
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+    try {
+      await sendOTP(email, phone);
+      setSuccessMsg("OTP resent! Please check your email inbox and spam folder.");
+      setResendTimer(30);
+    } catch (err) {
+      setError(err.message || "Failed to resend OTP.");
     } finally {
       setLoading(false);
     }
@@ -196,7 +226,7 @@ export default function Login() {
               <div className="login-otp-info">
                 <Sparkles size={16} style={{ flexShrink: 0, marginTop: 2 }} />
                 <div>
-                  <strong>Check your inbox:</strong> We've sent a 4-digit code to <strong>{email}</strong>. Enter it below to log in.
+                  <strong>Check your inbox:</strong> We've sent a 4-digit code to <strong>{email}</strong>. Enter it below to log in. <em>(Please also check your spam folder)</em>
                 </div>
               </div>
 
@@ -233,6 +263,26 @@ export default function Login() {
                 {loading ? "Verifying..." : "Verify & Login"}
                 <ChevronRight size={16} />
               </button>
+
+              <div style={{ marginTop: "1.2rem", textAlign: "center" }}>
+                <button
+                  type="button"
+                  onClick={handleResendOTP}
+                  disabled={resendTimer > 0 || loading}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: resendTimer > 0 ? "var(--text-muted)" : "var(--primary-color)",
+                    fontSize: "0.85rem",
+                    cursor: resendTimer > 0 ? "not-allowed" : "pointer",
+                    fontWeight: resendTimer > 0 ? "normal" : "600",
+                    textDecoration: resendTimer > 0 ? "none" : "underline",
+                    fontFamily: "inherit"
+                  }}
+                >
+                  {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Didn't receive code? Resend OTP"}
+                </button>
+              </div>
             </form>
           )}
 

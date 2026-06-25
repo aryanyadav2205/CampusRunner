@@ -9,6 +9,8 @@ from app.models.payment import Payment
 from app.models.admin import AdminLog
 from app.schemas.user import UserResponse
 from app.schemas.request import RequestResponse
+from app.schemas.wallet import WithdrawalRequestResponse
+from app.models.wallet import WithdrawalRequest, WithdrawalStatus, WalletTransaction, TransactionType
 from app.middleware.auth import get_current_admin
 from pydantic import BaseModel
 from app.config.constants import RequestStatus, PaymentStatus
@@ -105,8 +107,89 @@ def get_platform_revenue(
     for status_name, count in status_counts:
         counts_dict[status_name] = count
 
+    # Total System Liability (Wallet Balances)
+    total_liability = db.query(func.sum(User.wallet_balance)).scalar() or 0.0
+    
+    # User counts
+    total_users = db.query(User).count()
+    active_runners = db.query(User).filter(User.completed_deliveries > 0).count()
+
     return {
         "total_platform_fees": round(float(total_platform_fees), 2),
         "total_cod_handled": round(float(total_cod_handled), 2),
+        "system_liability": round(float(total_liability), 2),
+        "total_users": total_users,
+        "active_runners": active_runners,
         "request_volume": counts_dict
     }
+
+class ProcessWithdrawalPayload(BaseModel):
+    action: str  # "APPROVE" or "REJECT"
+    notes: Optional[str] = None
+
+@router.get("/withdrawals", response_model=List[WithdrawalRequestResponse])
+def get_all_withdrawals(
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Administrator view to inspect all withdrawal requests (pending and processed).
+    """
+    withdrawals = db.query(WithdrawalRequest).order_by(WithdrawalRequest.created_at.desc()).all()
+    return [WithdrawalRequestResponse.model_validate(w) for w in withdrawals]
+
+@router.post("/withdrawals/{withdrawal_id}/process")
+def process_withdrawal(
+    withdrawal_id: int,
+    payload: ProcessWithdrawalPayload,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Admin processes a pending withdrawal.
+    """
+    withdrawal = db.query(WithdrawalRequest).filter(WithdrawalRequest.id == withdrawal_id).first()
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Withdrawal request not found.")
+        
+    if withdrawal.status != WithdrawalStatus.PENDING:
+        raise HTTPException(status_code=400, detail=f"Request is already {withdrawal.status.value}.")
+        
+    from datetime import datetime
+    
+    user = db.query(User).filter(User.id == withdrawal.user_id).first()
+    
+    if payload.action == "APPROVE":
+        withdrawal.status = WithdrawalStatus.COMPLETED
+        # The money was already deducted from the user's wallet when they requested.
+    elif payload.action == "REJECT":
+        withdrawal.status = WithdrawalStatus.REJECTED
+        # Refund the money back to the user's wallet
+        if user:
+            user.wallet_balance += withdrawal.amount
+            
+            # Log the refund transaction
+            refund_tx = WalletTransaction(
+                user_id=user.id,
+                amount=withdrawal.amount,
+                transaction_type=TransactionType.CREDIT,
+                description=f"Refund: Withdrawal Rejected - {payload.notes or 'No reason provided'}",
+                reference_id=f"WD_REFUND_{withdrawal.id}"
+            )
+            db.add(refund_tx)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action. Use APPROVE or REJECT.")
+        
+    withdrawal.admin_notes = payload.notes
+    withdrawal.processed_at = datetime.utcnow()
+    
+    # Log the admin action
+    log = AdminLog(
+        admin_id=admin.id,
+        action=f"WITHDRAWAL_{payload.action}",
+        details=f"Withdrawal ID: {withdrawal_id}, Amount: {withdrawal.amount}, User ID: {withdrawal.user_id}"
+    )
+    db.add(log)
+    
+    db.commit()
+    return {"message": f"Withdrawal successfully {payload.action.lower()}ed."}

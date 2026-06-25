@@ -41,6 +41,7 @@ def create_delivery_request(
         owner_id=current_user.id,
         courier_company=payload.courier_company,
         tracking_number=payload.tracking_number,
+        tracking_image_url=payload.tracking_image_url,
         pickup_location=payload.pickup_location,
         hostel=payload.hostel,
         room_number=payload.room_number,

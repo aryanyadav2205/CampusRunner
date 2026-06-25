@@ -2,8 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.user import User
 from app.models.request import Request
-from app.models.review import Review
-from app.config.constants import RequestStatus, ReviewRole
+from app.config.constants import RequestStatus
 
 def update_user_reputation(db: Session, user_id: int):
     """
@@ -33,21 +32,9 @@ def update_user_reputation(db: Session, user_id: int):
     user.completed_deliveries = completed_runs
     user.completed_receipts = completed_receipts
 
-    # 2. Average Ratings
-    # Rating as a Runner (reviews given by owners to this user as runner)
-    avg_runner_rating = db.query(func.avg(Review.rating)).filter(
-        Review.reviewee_id == user_id,
-        Review.role == ReviewRole.RUNNER
-    ).scalar()
-    
-    # Rating as an Owner (reviews given by runners to this user as owner)
-    avg_owner_rating = db.query(func.avg(Review.rating)).filter(
-        Review.reviewee_id == user_id,
-        Review.role == ReviewRole.OWNER
-    ).scalar()
-
-    user.rating_runner = round(float(avg_runner_rating), 2) if avg_runner_rating is not None else 5.0
-    user.rating_owner = round(float(avg_owner_rating), 2) if avg_owner_rating is not None else 5.0
+    # 2. Average Ratings (Review system removed, maintaining 5.0 default)
+    user.rating_runner = 5.0
+    user.rating_owner = 5.0
 
     # 3. Success Rates
     # Runner Success Rate = Completed Runs / (Completed Runs + Cancelled Runs where runner accepted)

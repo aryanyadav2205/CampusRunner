@@ -7,11 +7,10 @@ from app.database.base import Base
 from app.models.user import User
 from app.models.request import Request
 from app.models.payment import Payment
-from app.models.review import Review
 from app.models.admin import AdminLog, OTPLog
+from app.models.message import Message
 
-# Import routers
-from app.routes import auth, profile, requests, payments, reviews, admin
+from app.routes import auth, profile, requests, payments, admin, upload, wallet, messages
 from app.middleware.rate_limit import default_rate_limiter
 
 # Create database tables automatically
@@ -22,6 +21,13 @@ app = FastAPI(
     description="Backend API for Campus Runner peer-to-peer delivery platform",
     version="1.0"
 )
+
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Ensure uploads directory exists and mount it
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Apply CORS middleware
 app.add_middleware(
@@ -52,8 +58,10 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")
 app.include_router(requests.router, prefix="/api")
 app.include_router(payments.router, prefix="/api")
-app.include_router(reviews.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(upload.router, prefix="/api")
+app.include_router(wallet.router, prefix="/api")
+app.include_router(messages.router, prefix="/api")
 
 @app.get("/")
 def read_root():

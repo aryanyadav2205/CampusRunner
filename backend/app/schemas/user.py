@@ -34,6 +34,7 @@ class UserResponse(BaseModel):
     success_rate_runner: float
     completed_deliveries: int
     completed_receipts: int
+    wallet_balance: float
     created_at: datetime
     
     # Computed property

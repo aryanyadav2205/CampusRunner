@@ -80,8 +80,8 @@ Do not share this code with anyone.
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 
-    # Send via Gmail SMTP
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+    # Send via Gmail SMTP (with timeout to prevent thread hanging)
+    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as server:
         server.starttls()
         server.login(sender, password)
         server.sendmail(sender, to_email, msg.as_string())
