@@ -6,6 +6,7 @@ from app.schemas.user import UserResponse
 from app.services import otp_service
 from app.utils.jwt import create_access_token
 from pydantic import BaseModel
+import os
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -114,8 +115,11 @@ def admin_login(payload: AdminLoginRequest, db: Session = Depends(get_db)):
     """
     email = payload.email.strip().lower()
     
-    # Hardcoded master credentials for admin
-    if email != "campusrunner4@gmail.com" or payload.password != "AryanRao@2205":
+    # Securely load master credentials for admin from environment variables
+    admin_email = os.getenv("ADMIN_EMAIL", "campusrunner4@gmail.com")
+    admin_password = os.getenv("ADMIN_PASSWORD", "AryanRao@2205")
+    
+    if email != admin_email or payload.password != admin_password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin credentials.")
         
     user = db.query(User).filter(User.email == email).first()

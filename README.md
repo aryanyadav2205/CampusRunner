@@ -122,8 +122,7 @@ npm run dev
 The platform includes a dedicated portal for administrative control, isolated from the standard student OTP flow.
 
 1. Navigate to: `http://localhost:5173/admin/login`
-2. **Admin Email**: `campusrunner4@gmail.com`
-3. **Master Password**: `AryanRao@2205`
+2. Log in using the admin credentials configured in your backend environment variables.
 
 From the Admin Dashboard, you can monitor total platform liability, suspend malicious users, audit ongoing parcel deliveries, and process pending UPI withdrawal requests from your runners.
 
