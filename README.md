@@ -73,5 +73,4 @@ Additional documentation can be found in the `docs/` folder:
 - [Deployment Guide](docs/DEPLOYMENT_GUIDE.md)
 - [System Workflow](docs/WORKFLOW.md)
 
-## License
-MIT License
+
