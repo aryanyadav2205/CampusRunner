@@ -2,49 +2,66 @@
   <img src="frontend/public/hero-illustration.png" alt="Campus Runner Logo" width="300"/>
   <h1>🏃‍♂️ Campus Runner</h1>
   <p><strong>The fastest, most trusted peer-to-peer parcel delivery network for college campuses.</strong></p>
+
+  <p>
+    <a href="https://github.com/aryanyadav2205/CampusRunner/stargazers"><img src="https://img.shields.io/github/stars/aryanyadav2205/CampusRunner?style=flat-square&color=blue" alt="Stars"></a>
+    <a href="https://github.com/aryanyadav2205/CampusRunner/network/members"><img src="https://img.shields.io/github/forks/aryanyadav2205/CampusRunner?style=flat-square&color=blue" alt="Forks"></a>
+    <img src="https://img.shields.io/badge/Python-3.9+-blue.svg?style=flat-square" alt="Python Version">
+    <img src="https://img.shields.io/badge/React-18+-blue.svg?style=flat-square" alt="React Version">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License"></a>
+  </p>
   
   <p>
-    <a href="#features">Features</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#installation--setup">Installation</a> •
-    <a href="#admin-access">Admin Access</a> •
-    <a href="#documentation">Documentation</a>
+    <a href="#-what-is-campus-runner">About</a> •
+    <a href="#-how-it-works">How It Works</a> •
+    <a href="#-key-features">Features</a> •
+    <a href="#%EF%B8%8F-tech-stack">Tech Stack</a> •
+    <a href="#-installation--setup-local-development">Installation</a> •
+    <a href="#-admin-access">Admin Access</a> •
+    <a href="#-documentation">Documentation</a>
   </p>
 </div>
 
 ---
 
 ## 🌟 What is Campus Runner?
-Campus Runner bridges the gap between busy students and active peers. It allows students to delegate parcel retrieval from campus gates or mailrooms to other active students ("runners"). Runners earn real money by picking up and delivering parcels along their regular campus routes, creating a fast, community-driven micro-logistics network.
+**Campus Runner** bridges the gap between busy students and active peers. It allows students to delegate parcel retrieval from campus gates or mailrooms to other active students ("runners"). Runners earn real money by picking up and delivering parcels along their regular campus routes, creating a fast, community-driven micro-logistics network.
+
+## 🚀 How It Works
+1. **Create a Request:** A student (Owner) needs a parcel from the gate. They create a request specifying the delivery location and a reward amount.
+2. **Accept the Run:** An active student (Runner) sees the open request on their dashboard and accepts it.
+3. **Secure Hand-off:** The runner picks up the parcel. Upon delivery, the owner provides a secure 4-digit OTP to complete the hand-off.
+4. **Get Paid:** The pre-agreed reward is instantly transferred to the runner's digital wallet, ready for withdrawal.
 
 ## ✨ Key Features
 * 🔄 **Dual Roles**: Every student account can seamlessly switch between acting as a **Parcel Owner** (requesting a delivery) and a **Runner** (accepting a delivery run).
 * 💰 **Prepaid & COD Support**: Comprehensive support for handling both pre-paid packages and Cash-on-Delivery (COD) handoffs.
-* 🛡️ **Secure OTP Deliveries**: Six-digit OTP verification ensures that high-value parcels are only handed over to the correct recipient.
+* 🛡️ **Secure OTP Deliveries**: 4-digit OTP verification ensures that high-value parcels are only handed over to the correct recipient.
 * 💳 **Integrated Digital Wallet**: Runners earn payouts directly into their built-in CampusRunner wallet, with a fully functioning ledger system.
 * 🏦 **UPI Payouts System**: Runners can request wallet withdrawals directly to their UPI IDs (GPay, PhonePe, Paytm).
 * 💬 **In-App Messaging**: Real-time communication portal allowing Owners and Runners to chat seamlessly regarding their active deliveries.
-* 🎛️ **Admin Control Center**: A dedicated, secure dashboard for platform administrators to monitor revenue, audit parcel logs, manage user suspensions, and process runner payouts.
+* 🎫 **Support Tickets System**: A built-in ticketing system to resolve user disputes, request assistance, and manage queries directly with admins.
+* 🎛️ **Admin Control Center**: A dedicated, secure dashboard for platform administrators to monitor revenue, audit parcel logs, manage user suspensions, process runner payouts, and resolve support tickets.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend Architecture
-* **Framework**: React.js with Vite for lightning-fast HMR and building.
+* **Framework**: [React.js](https://reactjs.org/) with Vite for lightning-fast HMR and building.
 * **Styling**: Pure CSS with a highly dynamic, variable-driven UI (Includes both a Dark "Green" theme and Light "Blue" theme).
-* **Icons**: Lucide React.
-* **Routing**: React Router DOM v6.
+* **Icons**: [Lucide React](https://lucide.dev/).
+* **Routing**: [React Router DOM v6](https://reactrouter.com/).
 
 ### Backend Architecture
-* **Framework**: FastAPI (Python) for ultra-fast, async RESTful API endpoints.
+* **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python) for ultra-fast, async RESTful API endpoints.
 * **Database**: SQLite for development (Easily scalable to PostgreSQL via SQLAlchemy ORM).
 * **Authentication**: Stateless JWT (JSON Web Tokens) with email OTP verification.
 * **Payments**: Razorpay API integration for secure fee processing.
 
 ---
 
-## 🚀 Installation & Setup (Local Development)
+## 💻 Installation & Setup (Local Development)
 
 ### Prerequisites
 Make sure you have the following installed on your local machine:
@@ -124,7 +141,7 @@ The platform includes a dedicated portal for administrative control, isolated fr
 1. Navigate to: `http://localhost:5173/admin/login`
 2. Log in using the admin credentials configured in your backend environment variables.
 
-From the Admin Dashboard, you can monitor total platform liability, suspend malicious users, audit ongoing parcel deliveries, and process pending UPI withdrawal requests from your runners.
+From the Admin Dashboard, you can monitor total platform liability, suspend malicious users, audit ongoing parcel deliveries, process pending UPI withdrawal requests from your runners, and resolve support tickets.
 
 ---
 
@@ -137,6 +154,9 @@ For deeper technical insights and deployment strategies, refer to the documentat
 - 🔄 [System Workflow](docs/WORKFLOW.md)
 
 ---
+
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/aryanyadav2205/CampusRunner/issues).
 
 ## 📄 License
 This project is licensed under the MIT License.
