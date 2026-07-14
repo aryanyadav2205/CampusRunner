@@ -5,13 +5,25 @@ import { Shield, Lock, Mail, ArrowRight, ShieldCheck, Zap, Headphones } from "lu
 import "../Login/Login.css"; // Reuse the main login CSS
 
 export default function AdminLogin() {
-  const { adminLogin } = useAuth();
+  const { adminLogin, devLogin } = useAuth();
   const navigate = useNavigate();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleDevAdminLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await devLogin("admin");
+      navigate("/admin");
+    } catch (err) {
+      setError(err.message || "Dev login failed.");
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,7 +98,7 @@ export default function AdminLogin() {
                 <Mail size={16} className="input-icon" />
                 <input
                   type="email"
-                  placeholder="campusrunner4@gmail.com"
+                  placeholder="Enter Your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -100,7 +112,7 @@ export default function AdminLogin() {
                 <Lock size={16} className="input-icon" />
                 <input
                   type="password"
-                  placeholder="••••••••••••"
+                  placeholder="Enter Your Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -118,6 +130,18 @@ export default function AdminLogin() {
             <p className="login-terms" style={{ marginTop: "1.5rem" }}>
               <Link to="/login">Not an admin? Return to Student Login</Link>
             </p>
+
+            {/* DEV ONLY BUTTON */}
+            <button 
+              type="button" 
+              onClick={handleDevAdminLogin} 
+              disabled={loading} 
+              className="login-submit-btn" 
+              style={{ marginTop: "1rem", backgroundColor: "#333", color: "white" }}
+            >
+              {loading ? "Logging in..." : "1-Click Dev Login (Admin)"}
+              <Zap size={16} />
+            </button>
           </form>
 
           {/* Trust Indicators */}

@@ -28,29 +28,22 @@ export default function CreateRequest() {
   const [dragActive, setDragActive] = useState(false);
 
   // Calculation states
-  const [platformFee, setPlatformFee] = useState(3.0);
-  const [totalAmount, setTotalAmount] = useState(33.0);
+  const [totalAmount, setTotalAmount] = useState(30.0);
 
   // Flow states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [createdOTP, setCreatedOTP] = useState("");
 
-  // recalculate fees on change
+  // recalculate total on change
   useEffect(() => {
     const rewardVal = parseFloat(reward) || 0.0;
     const codVal = orderType === "COD" ? parseFloat(codAmount) || 0.0 : 0.0;
     
-    // Platform fee: 10% of reward
-    let fee = rewardVal * 0.10;
-    if (orderType === "COD") {
-      fee += 10.0; // ₹10 extra for COD processing
-    }
+    // COD processing fee: ₹10 for COD orders only
+    const codFee = orderType === "COD" ? 10.0 : 0.0;
+    const total = Math.round((rewardVal + codFee + codVal) * 100) / 100;
 
-    const calculatedFee = Math.round(fee * 100) / 100;
-    const total = Math.round((rewardVal + calculatedFee + codVal) * 100) / 100;
-
-    setPlatformFee(calculatedFee);
     setTotalAmount(total);
   }, [reward, orderType, codAmount]);
 
@@ -407,20 +400,21 @@ export default function CreateRequest() {
               <span>Delivery Reward Payout:</span>
               <span className="calc-value">₹{reward}</span>
             </div>
-            
-            <div className="calc-row">
-              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <span>Platform Service Fee:</span>
-                <HelpCircle size={14} title="10% platform fee. Extra ₹10 processing fee for COD orders." style={{ cursor: "help" }} />
-              </span>
-              <span className="calc-value">₹{platformFee}</span>
-            </div>
 
             {orderType === "COD" && (
-              <div className="calc-row">
-                <span>COD Parcel Price:</span>
-                <span className="calc-value">₹{codAmount}</span>
-              </div>
+              <>
+                <div className="calc-row">
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span>COD Processing Fee:</span>
+                    <HelpCircle size={14} title="Fixed ₹10 processing fee for Cash on Delivery orders." style={{ cursor: "help" }} />
+                  </span>
+                  <span className="calc-value">₹10</span>
+                </div>
+                <div className="calc-row">
+                  <span>COD Parcel Price:</span>
+                  <span className="calc-value">₹{codAmount}</span>
+                </div>
+              </>
             )}
 
             <hr className="calc-divider" />

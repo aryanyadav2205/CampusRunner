@@ -5,7 +5,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { listOpenRequests, listMyRequests, acceptRequest } from "../../services/requestService";
 import {
   LayoutDashboard, Package, IndianRupee, ClipboardList, MessageSquare,
-  Wallet, User, Settings, LogOut, ArrowRight, Plus, RefreshCw,
+  Wallet, User, Headphones, LogOut, ArrowRight, Plus, RefreshCw,
   Star, Sun, Moon, Send, Bike, Gift, ChevronRight
 } from "lucide-react";
 import RequestCard from "../../components/RequestCard/RequestCard";
@@ -78,7 +78,7 @@ export default function Dashboard() {
 
   const bottomItems = [
     { icon: User, label: "Profile", path: "/profile" },
-    { icon: Settings, label: "Settings", path: "#" },
+    { icon: Headphones, label: "Support", path: "/support" },
   ];
 
   // Get status class for delivery items

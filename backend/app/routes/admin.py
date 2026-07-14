@@ -10,7 +10,9 @@ from app.models.admin import AdminLog
 from app.schemas.user import UserResponse
 from app.schemas.request import RequestResponse
 from app.schemas.wallet import WithdrawalRequestResponse
+from app.schemas.support_ticket import SupportTicketResponse
 from app.models.wallet import WithdrawalRequest, WithdrawalStatus, WalletTransaction, TransactionType
+from app.models.support_ticket import SupportTicket
 from app.middleware.auth import get_current_admin
 from pydantic import BaseModel
 from app.config.constants import RequestStatus, PaymentStatus
@@ -193,3 +195,15 @@ def process_withdrawal(
     
     db.commit()
     return {"message": f"Withdrawal successfully {payload.action.lower()}ed."}
+
+@router.get("/support/tickets", response_model=List[SupportTicketResponse])
+def get_all_support_tickets(
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Administrator view to inspect all support tickets.
+    """
+    tickets = db.query(SupportTicket).order_by(SupportTicket.created_at.desc()).all()
+    return tickets
+

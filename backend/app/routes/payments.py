@@ -5,7 +5,7 @@ from app.models.user import User
 from app.schemas.payment import PaymentOrderCreate, PaymentOrderResponse
 from app.middleware.auth import get_current_user
 from app.services import payment_service
-from app.config.constants import PLATFORM_FEE_PERCENT, COD_ADDITIONAL_FEE
+from app.config.constants import COD_PROCESSING_FEE, RUNNER_DEDUCTION_PERCENT
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
@@ -21,12 +21,15 @@ def create_order(
     order_type = payload.order_type
     cod = payload.cod_amount if order_type == "COD" else 0.0
 
-    # Calculate platform fees
-    platform_fee = round(reward * PLATFORM_FEE_PERCENT, 2)
-    if order_type == "COD":
-        platform_fee = round(platform_fee + COD_ADDITIONAL_FEE, 2)
+    # COD processing fee: ₹10 for COD orders, ₹0 for prepaid
+    cod_fee = COD_PROCESSING_FEE if order_type == "COD" else 0.0
+    
+    # Runner deduction (10%) — not charged to owner, deducted from runner's payout
+    runner_deduction = round(reward * RUNNER_DEDUCTION_PERCENT, 2)
+    runner_payout = round(reward - runner_deduction, 2)
 
-    total_amount = round(reward + platform_fee + cod, 2)
+    # Owner pays: reward + COD fee + COD amount
+    total_amount = round(reward + cod_fee + cod, 2)
 
     try:
         order = payment_service.create_razorpay_order(total_amount)
@@ -34,7 +37,8 @@ def create_order(
             "razorpay_order_id": order["id"],
             "amount": order["amount"],
             "currency": order["currency"],
-            "platform_fee": platform_fee,
+            "platform_fee": cod_fee,
+            "runner_payout": runner_payout,
             "total_amount": total_amount
         }
     except Exception as e:

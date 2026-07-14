@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from app.models.request import Request
 from app.models.payment import Payment
 from app.models.user import User
-from app.config.constants import RequestStatus, PaymentStatus, PLATFORM_FEE_PERCENT, COD_ADDITIONAL_FEE
+from app.config.constants import RequestStatus, PaymentStatus, COD_PROCESSING_FEE, RUNNER_DEDUCTION_PERCENT
 from app.models.wallet import WalletTransaction, TransactionType
 from app.utils.helpers import generate_numeric_otp
 from app.utils.security import hash_otp, verify_otp_hash
@@ -37,11 +37,9 @@ def create_request(
             detail="Reward offered must be between ₹20 and ₹100."
         )
 
-    # 2. Calculate platform fees
-    platform_fee = round(reward_offered * PLATFORM_FEE_PERCENT, 2)
-    if order_type == "COD":
-        platform_fee = round(platform_fee + COD_ADDITIONAL_FEE, 2)
-    else:
+    # 2. Calculate fees — COD processing fee for owner, no platform fee
+    platform_fee = COD_PROCESSING_FEE if order_type == "COD" else 0.0
+    if order_type != "COD":
         cod_amount = 0.0  # Prepaid has no COD amount
 
     total_amount = round(reward_offered + platform_fee + cod_amount, 2)
@@ -188,16 +186,18 @@ def verify_delivery_otp(db: Session, request_id: int, otp_code: str, runner_id: 
         # Avoid null values
         if runner.wallet_balance is None:
             runner.wallet_balance = 0.0
-            
+        # Deduct 10% platform fee from runner's reward
         reward = request.reward_offered or 0.0
-        runner.wallet_balance += reward
+        runner_deduction = round(reward * RUNNER_DEDUCTION_PERCENT, 2)
+        runner_payout = round(reward - runner_deduction, 2)
+        runner.wallet_balance += runner_payout
         
         # Log the transaction
         transaction = WalletTransaction(
             user_id=runner.id,
-            amount=reward,
+            amount=runner_payout,
             transaction_type=TransactionType.CREDIT,
-            description=f"Earnings for delivery #{request.id}",
+            description=f"Earnings for delivery #{request.id} (₹{reward} - 10% platform fee)",
             reference_id=f"REQ_{request.id}"
         )
         db.add(transaction)

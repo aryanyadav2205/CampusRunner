@@ -12,6 +12,7 @@ class PaymentOrderResponse(BaseModel):
     amount: int  # in paise
     currency: str
     platform_fee: float
+    runner_payout: float
     total_amount: float
 
 class PaymentResponse(BaseModel):

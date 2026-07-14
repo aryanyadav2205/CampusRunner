@@ -65,6 +65,7 @@ RAZORPAY_KEY_SECRET=yourkeysecret
    ```
 3. Start development server:
    ```bash
+   Set-ExecutionPolicy RemoteSigned -Scope CurrentUse
    npm run dev
    ```
 

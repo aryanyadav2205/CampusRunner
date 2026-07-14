@@ -39,6 +39,7 @@ class RequestResponse(BaseModel):
     cod_amount: float
     reward_offered: float
     platform_fee: float
+    runner_payout: Optional[float] = None
     total_amount: float
     notes: Optional[str] = None
     status: str
@@ -60,4 +61,7 @@ class RequestResponse(BaseModel):
         instance = super().model_validate(obj, *args, **kwargs)
         if hasattr(obj, "temp_otp_code"):
             instance.otp_code = obj.temp_otp_code
+        # Compute runner payout: reward minus 10% platform deduction
+        if instance.reward_offered:
+            instance.runner_payout = round(instance.reward_offered * 0.90, 2)
         return instance

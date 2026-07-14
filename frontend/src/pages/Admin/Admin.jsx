@@ -7,7 +7,7 @@ import {
   Users, AlertCircle, ShieldAlert, CreditCard, 
   ArrowLeft, CheckCircle2, RefreshCw, Star, Ban, Undo2, 
   Wallet, Banknote, IndianRupee, Clock, Check,
-  Moon, Sun, LogOut, ChevronRight
+  Moon, Sun, LogOut, ChevronRight, Headphones, XCircle
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import "../Dashboard/Dashboard.css"; // Reuse the main dashboard CSS
@@ -22,6 +22,9 @@ export default function Admin() {
   const [requestsList, setRequestsList] = useState([]);
   const [revenueStats, setRevenueStats] = useState(null);
   const [withdrawalsList, setWithdrawalsList] = useState([]);
+  const [supportList, setSupportList] = useState([]);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyMessage, setReplyMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -39,6 +42,9 @@ export default function Admin() {
       } else if (activeView === "payouts") {
         const withdrawals = await apiCall("/admin/withdrawals", "GET");
         setWithdrawalsList(withdrawals);
+      } else if (activeView === "support") {
+        const tickets = await apiCall("/admin/support/tickets", "GET");
+        setSupportList(tickets);
       }
     } catch (error) {
       console.error("Failed to load admin view data:", error);
@@ -104,12 +110,36 @@ export default function Admin() {
     }
   };
 
+  const handleResolveTicket = async (ticketId) => {
+    try {
+      await apiCall(`/support/tickets/${ticketId}`, "PATCH", { status: "CLOSED" });
+      alert("Ticket resolved successfully.");
+      loadAdminData();
+    } catch (err) {
+      alert(err.message || "Failed to resolve ticket.");
+    }
+  };
+
+  const handleReplySubmit = async (ticketId) => {
+    if (!replyMessage.trim()) return alert("Reply cannot be empty.");
+    try {
+      await apiCall(`/support/tickets/${ticketId}/reply`, "PATCH", { reply_message: replyMessage });
+      alert("Reply sent and ticket resolved.");
+      setReplyingTo(null);
+      setReplyMessage("");
+      loadAdminData();
+    } catch (err) {
+      alert(err.message || "Failed to send reply.");
+    }
+  };
+
   // Sidebar nav items
   const navItems = [
     { id: "overview", icon: Star, label: "Platform Overview" },
     { id: "users", icon: Users, label: "User Profiles" },
     { id: "requests", icon: AlertCircle, label: "Parcel Audits" },
     { id: "payouts", icon: Banknote, label: "Payout Management" },
+    { id: "support", icon: Headphones, label: "Support Tickets" },
   ];
 
   return (
@@ -424,6 +454,121 @@ export default function Admin() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {/* SUPPORT TICKETS VIEW */}
+            {activeView === "support" && (
+              <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "12px", overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.9rem" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid var(--border-color)", color: "var(--text-secondary)", background: "rgba(0,0,0,0.1)" }}>
+                      <th style={{ padding: "12px 16px" }}>Ticket Info</th>
+                      <th style={{ padding: "12px 16px" }}>User ID</th>
+                      <th style={{ padding: "12px 16px" }}>Message</th>
+                      <th style={{ padding: "12px 16px" }}>Status</th>
+                      <th style={{ padding: "12px 16px" }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {supportList.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)" }}>
+                          No support tickets found.
+                        </td>
+                      </tr>
+                    )}
+                    {supportList.map((ticket) => (
+                      <tr key={ticket.id} style={{ borderBottom: "1px solid var(--border-color)", color: "var(--text-primary)" }}>
+                        <td style={{ padding: "16px", verticalAlign: "top" }}>
+                          <strong style={{ display: "block" }}>{ticket.subject}</strong>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                            ID: #{ticket.id} • {new Date(ticket.created_at).toLocaleDateString()}
+                          </span>
+                        </td>
+                        <td style={{ padding: "16px", verticalAlign: "top" }}>User {ticket.user_id}</td>
+                        <td style={{ padding: "16px", maxWidth: "300px", verticalAlign: "top" }}>
+                          <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: "0.85rem" }}>
+                            {ticket.message}
+                          </p>
+                          {ticket.admin_reply && (
+                            <div style={{ marginTop: "8px", padding: "8px", background: "rgba(var(--primary-color-rgb), 0.05)", borderLeft: "2px solid var(--primary-color)", borderRadius: "4px" }}>
+                              <strong style={{ display: "block", fontSize: "0.75rem", color: "var(--primary-color)" }}>Admin Reply:</strong>
+                              <p style={{ margin: 0, fontSize: "0.85rem", whiteSpace: "pre-wrap" }}>{ticket.admin_reply}</p>
+                            </div>
+                          )}
+                          {replyingTo === ticket.id && (
+                            <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                              <textarea
+                                value={replyMessage}
+                                onChange={(e) => setReplyMessage(e.target.value)}
+                                placeholder="Type your reply here. Submitting will email the user and resolve the ticket..."
+                                style={{
+                                  width: "100%", minHeight: "80px", padding: "8px", borderRadius: "6px",
+                                  border: "1px solid var(--border-color)", background: "var(--bg-main)",
+                                  color: "var(--text-primary)", fontFamily: "inherit", fontSize: "0.85rem"
+                                }}
+                              />
+                              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                                <button onClick={() => setReplyingTo(null)} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--border-color)", background: "transparent", color: "var(--text-secondary)", cursor: "pointer", fontSize: "0.75rem" }}>Cancel</button>
+                                <button onClick={() => handleReplySubmit(ticket.id)} style={{ padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--primary-color)", color: "white", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}>Send Reply</button>
+                              </div>
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ padding: "16px", verticalAlign: "top" }}>
+                          <div style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            fontSize: "0.75rem",
+                            fontWeight: "600",
+                            background: ticket.status === "OPEN" ? "rgba(var(--primary-color-rgb), 0.1)" : 
+                                        ticket.status === "CLOSED" ? "rgba(16, 185, 129, 0.1)" : "rgba(107, 114, 128, 0.1)",
+                            color: ticket.status === "OPEN" ? "var(--primary-color)" : 
+                                   ticket.status === "CLOSED" ? "#10b981" : "#6b7280"
+                          }}>
+                            {ticket.status === "OPEN" ? <Clock size={12} /> : 
+                             ticket.status === "CLOSED" ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                            {ticket.status}
+                          </div>
+                        </td>
+                        <td style={{ padding: "16px", verticalAlign: "top" }}>
+                          {ticket.status === "OPEN" && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                              {replyingTo !== ticket.id && (
+                                <button
+                                  onClick={() => { setReplyingTo(ticket.id); setReplyMessage(""); }}
+                                  style={{
+                                    background: "rgba(56, 189, 248, 0.1)", color: "#38bdf8",
+                                    border: "1px solid rgba(56, 189, 248, 0.3)", borderRadius: "6px",
+                                    padding: "6px 12px", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600",
+                                    transition: "all 0.2s", width: "100%"
+                                  }}
+                                >
+                                  Reply
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleResolveTicket(ticket.id)}
+                                style={{
+                                  background: "rgba(34, 197, 94, 0.1)", color: "#22c55e",
+                                  border: "1px solid rgba(34, 197, 94, 0.3)", borderRadius: "6px",
+                                  padding: "6px 12px", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600",
+                                  transition: "all 0.2s", width: "100%"
+                                }}
+                              >
+                                Mark Resolved
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

@@ -16,6 +16,7 @@ import Admin from "../pages/Admin/Admin";
 import AdminLogin from "../pages/AdminLogin/AdminLogin";
 import Wallet from "../pages/Wallet/Wallet";
 import Messages from "../pages/Messages/Messages";
+import Support from "../pages/Support/Support";
 
 // Layout components
 import Navbar from "../components/Navbar/Navbar";
@@ -142,6 +143,12 @@ export default function AppRoutes() {
       <Route path="/messages" element={
         <ProtectedRoute>
           <Messages />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/support" element={
+        <ProtectedRoute>
+          <Support />
         </ProtectedRoute>
       } />
 

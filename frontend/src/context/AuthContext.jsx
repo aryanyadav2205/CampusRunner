@@ -52,19 +52,33 @@ export function AuthProvider({ children }) {
     localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
-  const handleAdminLogin = async (email, password) => {
-    try {
-      const response = await adminLogin(email, password);
-      setToken(response.token);
-      setUser(response.user);
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      return response.user;
-    } catch (error) {
-      console.error("Admin login failed:", error);
-      throw error;
-    }
-  };
+    const handleAdminLogin = async (email, password) => {
+      try {
+        const response = await adminLogin(email, password);
+        setToken(response.token);
+        setUser(response.user);
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        return response.user;
+      } catch (error) {
+        console.error("Admin login failed:", error);
+        throw error;
+      }
+    };
+
+    const handleDevLogin = async (role = "user") => {
+      try {
+        const response = await apiCall("/auth/dev/login", "POST", { role });
+        setToken(response.token);
+        setUser(response.user);
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        return response.user;
+      } catch (error) {
+        console.error("Dev login failed:", error);
+        throw error;
+      }
+    };
 
   const value = {
     user,
@@ -72,6 +86,7 @@ export function AuthProvider({ children }) {
     loading,
     login: handleLogin,
     adminLogin: handleAdminLogin,
+    devLogin: handleDevLogin,
     logout: handleLogout,
     updateProfile,
   };

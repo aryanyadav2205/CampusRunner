@@ -526,6 +526,7 @@
   }
 
   .dash-sidebar {
+    
     width: 100%;
     height: auto;
     position: relative;
@@ -572,4 +573,5 @@
   .dash-stats-row {
     grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
+}
 }

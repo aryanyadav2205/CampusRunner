@@ -41,7 +41,8 @@ export default function Payments() {
 
         // Map runs requests (money earned)
         runs.forEach((run) => {
-          const reward = run.reward_offered;
+          // Runner receives reward minus 10% platform deduction
+          const reward = run.runner_payout ?? Math.round(run.reward_offered * 0.9 * 100) / 100;
           
           if (run.status === "COMPLETED") {
             earned += reward;

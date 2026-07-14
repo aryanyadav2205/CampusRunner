@@ -9,7 +9,7 @@ import {
 import "./Login.css";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, devLogin } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -74,6 +74,22 @@ export default function Login() {
     } catch (err) {
       setError(err.message || "Failed to resend OTP.");
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDevLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const loggedUser = await devLogin("user");
+      if (!loggedUser.full_name || !loggedUser.registration_number || !loggedUser.hostel || !loggedUser.room_number) {
+        navigate("/profile", { state: { fromLogin: true } });
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setError(err.message || "Dev login failed.");
       setLoading(false);
     }
   };
@@ -217,6 +233,18 @@ export default function Login() {
               <p className="login-terms" style={{ marginTop: "0.5rem", fontSize: "0.7rem" }}>
                 By continuing, you agree to our <a href="#">Terms of Service</a>
               </p>
+
+              {/* DEV ONLY BUTTON */}
+              <button 
+                type="button" 
+                onClick={handleDevLogin} 
+                disabled={loading} 
+                className="login-submit-btn" 
+                style={{ marginTop: "1rem", backgroundColor: "#333", color: "white" }}
+              >
+                {loading ? "Logging in..." : "1-Click Dev Login"}
+                <Zap size={16} />
+              </button>
             </form>
           )}
 

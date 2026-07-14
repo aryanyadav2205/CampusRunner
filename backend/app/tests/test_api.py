@@ -1,4 +1,5 @@
 import os
+# pyrefly: ignore [missing-import]
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -102,8 +103,8 @@ def test_full_application_lifecycle():
     assert response.status_code == 200
     pay_order = response.json()
     assert pay_order["razorpay_order_id"].startswith("order_mock_")
-    assert pay_order["platform_fee"] == 5.0
-    assert pay_order["total_amount"] == 55.0
+    assert pay_order["platform_fee"] == 0.0
+    assert pay_order["total_amount"] == 50.0
 
     # 6. Create Request
     response = client.post("/api/requests", json={

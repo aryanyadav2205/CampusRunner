@@ -9,8 +9,9 @@ from app.models.request import Request
 from app.models.payment import Payment
 from app.models.admin import AdminLog, OTPLog
 from app.models.message import Message
+from app.models.support_ticket import SupportTicket
 
-from app.routes import auth, profile, requests, payments, admin, upload, wallet, messages
+from app.routes import auth, profile, requests, payments, admin, upload, wallet, messages, support
 from app.middleware.rate_limit import default_rate_limiter
 
 # Create database tables automatically
@@ -62,6 +63,7 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
 app.include_router(wallet.router, prefix="/api")
 app.include_router(messages.router, prefix="/api")
+app.include_router(support.router, prefix="/api")
 
 @app.get("/")
 def read_root():

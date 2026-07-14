@@ -98,8 +98,20 @@ export default function RequestDetails() {
     }
   };
 
+  const prevMsgCount = React.useRef(0);
+  const hasLoadedOnce = React.useRef(false);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!hasLoadedOnce.current) {
+      // First time messages are loaded — don't scroll, just record count
+      hasLoadedOnce.current = messages.length > 0;
+      prevMsgCount.current = messages.length;
+      return;
+    }
+    // Only scroll if there are genuinely new messages
+    if (messages.length > prevMsgCount.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    prevMsgCount.current = messages.length;
   }, [messages]);
 
   useEffect(() => {
@@ -473,7 +485,7 @@ export default function RequestDetails() {
                 textTransform: "uppercase",
               }}
             >
-              Runner Reward Payout
+              Runner Earnings
             </span>
             <span
               style={{
@@ -485,7 +497,10 @@ export default function RequestDetails() {
               }}
             >
               <IndianRupee size={14} />
-              {request.reward_offered}
+              {request.runner_payout ?? request.reward_offered}
+            </span>
+            <span style={{ fontSize: "0.6rem", color: "var(--text-secondary)" }}>
+              10% platform fee deducted
             </span>
           </div>
 

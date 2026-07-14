@@ -26,6 +26,9 @@ class TokenResponse(BaseModel):
     token: str
     user: UserResponse
 
+class DevLoginRequest(BaseModel):
+    role: str = "user"
+
 @router.post("/otp/send", status_code=status.HTTP_200_OK)
 def send_otp(payload: OTPSendRequest, db: Session = Depends(get_db)):
     """
@@ -138,6 +141,52 @@ def admin_login(payload: AdminLoginRequest, db: Session = Depends(get_db)):
         db.refresh(user)
     elif not user.is_admin:
         # Ensure they have admin rights
+        user.is_admin = True
+        db.commit()
+        
+    token = create_access_token(data={"sub": user.email})
+    
+    return {
+        "token": token,
+        "user": UserResponse.model_validate(user)
+    }
+
+@router.post("/dev/login", response_model=TokenResponse)
+def dev_login(payload: DevLoginRequest, db: Session = Depends(get_db)):
+    """
+    1-click login for development purposes.
+    """
+    if os.getenv("ENVIRONMENT") == "production":
+        raise HTTPException(status_code=403, detail="Dev login disabled in production")
+
+    email = "dev@example.com" if payload.role == "user" else os.getenv("ADMIN_EMAIL", "campusrunner4@gmail.com")
+    
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user:
+        if payload.role == "admin":
+            user = User(
+                email=email,
+                phone_number="0000000000",
+                full_name="Platform Admin",
+                is_admin=True,
+                is_verified=True
+            )
+        else:
+            user = User(
+                email=email,
+                phone_number="1234567890",
+                full_name="Dev User",
+                registration_number="DEV123",
+                hostel="Dev Hostel",
+                room_number="101",
+                is_admin=False,
+                is_verified=True
+            )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    elif payload.role == "admin" and not user.is_admin:
         user.is_admin = True
         db.commit()
         

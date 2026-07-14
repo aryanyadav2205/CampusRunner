@@ -1,6 +1,6 @@
 # Fees configuration
-PLATFORM_FEE_PERCENT = 0.10  # 10% of reward
-COD_ADDITIONAL_FEE = 10.0    # ₹10 extra for Cash on Delivery
+COD_PROCESSING_FEE = 10.0        # Fixed ₹10 fee for COD orders (charged to owner)
+RUNNER_DEDUCTION_PERCENT = 0.10  # 10% deducted from runner's reward as platform fee
 
 # Reward limits
 MIN_REWARD = 20.0
