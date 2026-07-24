@@ -55,7 +55,7 @@
 
 ### Backend Architecture
 * **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python) for ultra-fast, async RESTful API endpoints.
-* **Database**: SQLite for development (Easily scalable to PostgreSQL via SQLAlchemy ORM).
+* **Database**: SQLite for development / PostgreSQL for production (via SQLAlchemy ORM & `psycopg2-binary` with automatic URI normalization).
 * **Authentication**: Stateless JWT (JSON Web Tokens) with email OTP verification.
 * **Payments**: Razorpay API integration for secure fee processing.
 
@@ -94,7 +94,7 @@ pip install -r requirements.txt
 
 Create a `.env` file in the root of the `backend` directory and configure the following variables:
 ```env
-# Database
+# Database (SQLite by default, or PostgreSQL string)
 DATABASE_URL=sqlite:///./campus_runner.db
 
 # Authentication
@@ -104,6 +104,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440
 # Payment Gateway
 RAZORPAY_KEY_ID=rzp_test_yourkeyid
 RAZORPAY_KEY_SECRET=yourkeysecret
+```
+
+(Optional) Seed the database with demo users and requests:
+```bash
+python seed_data.py
 ```
 
 Start the FastAPI backend server:

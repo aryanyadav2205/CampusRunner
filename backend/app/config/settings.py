@@ -5,7 +5,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings:
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./campus_runner.db")
+    # Database URL configuration (Fixes postgres:// to postgresql:// for SQLAlchemy)
+    _db_url = os.getenv("DATABASE_URL", "sqlite:///./campus_runner.db")
+    if _db_url.startswith("postgres://"):
+        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL: str = _db_url
+    
     SECRET_KEY: str = os.getenv("SECRET_KEY", "supersecretjwtsecretkeychangeinproduction")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
