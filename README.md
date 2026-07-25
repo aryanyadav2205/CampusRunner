@@ -16,6 +16,7 @@
     <a href="#-how-it-works">How It Works</a> •
     <a href="#-key-features">Features</a> •
     <a href="#%EF%B8%8F-tech-stack">Tech Stack</a> •
+    <a href="#-project-structure">Project Structure</a> •
     <a href="#-installation--setup-local-development">Installation</a> •
     <a href="#-admin-access">Admin Access</a> •
     <a href="#-documentation">Documentation</a>
@@ -60,6 +61,52 @@
 * **Payments**: Razorpay API integration for secure fee processing.
 
 ---
+
+## 📂 Project Structure
+
+```
+CampusRunner/
+├── 📁 backend/                  # FastAPI Backend Server
+│   ├── 📁 app/
+│   │   ├── 📁 config/           # App settings & environment configurations
+│   │   ├── 📁 database/         # SQLAlchemy DB connection & base session
+│   │   ├── 📁 middleware/       # JWT auth & security middleware
+│   │   ├── 📁 models/           # SQLAlchemy database ORM models
+│   │   ├── 📁 routes/           # REST API endpoints (Auth, Requests, Admin, Wallet)
+│   │   ├── 📁 schemas/          # Pydantic request/response validation schemas
+│   │   ├── 📁 services/         # Business logic services (OTP, Razorpay, Wallet, Reviews)
+│   │   ├── 📁 tests/            # Automated Pytest suite
+│   │   └── 📄 main.py           # FastAPI application entry point
+│   ├── 📁 uploads/              # Local storage for user uploads
+│   ├── 📄 requirements.txt      # Python backend dependencies
+│   └── 📄 seed_data.py          # Database seeding script for development
+│
+├── 📁 frontend/                 # React + Vite Frontend Application
+│   ├── 📁 public/               # Static assets & brand logos
+│   ├── 📁 src/
+│   │   ├── 📁 assets/           # UI styles & icons
+│   │   ├── 📁 components/       # Reusable React UI components (Navbar, Modals, Cards)
+│   │   ├── 📁 context/          # React State Contexts (AuthContext, ThemeContext)
+│   │   ├── 📁 pages/            # Application views (Dashboard, Admin, Profile, Wallet)
+│   │   ├── 📁 services/         # Axios API clients & backend communication
+│   │   ├── 📄 App.jsx           # Main application router & layout
+│   │   ├── 📄 index.css         # Design system, themes & global CSS
+│   │   └── 📄 main.jsx          # React app entry point
+│   ├── 📄 package.json          # Node.js dependencies & scripts
+│   └── 📄 vite.config.js        # Vite build tool configuration
+│
+├── 📁 docs/                     # Technical documentation & guides
+│   ├── 📄 API_DOCUMENTATION.md  # API endpoints specification
+│   ├── 📄 DATABASE_SCHEMA.md    # Relational database tables & columns
+│   ├── 📄 DEPLOYMENT_GUIDE.md   # Setup & production deployment guide
+│   └── 📄 PRD.md                # Product Requirements Document
+│
+├── 📄 .gitignore                # Git ignored patterns
+└── 📄 README.md                 # Main project overview & documentation
+```
+
+---
+
 
 ## 💻 Installation & Setup (Local Development)
 
