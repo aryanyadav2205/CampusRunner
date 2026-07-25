@@ -25,8 +25,9 @@ campus-runner/
 ### 2.1 Backend configuration (`backend/.env`)
 Create a `.env` file in the root of the backend folder with the following variables:
 ```env
-# Database
-DATABASE_URL=sqlite:///./campus_runner.db
+# Database (Neon PostgreSQL connection string)
+DATABASE_URL=postgresql://user:password@ep-xyz.neon.tech/dbname?sslmode=require
+
 
 # Security
 SECRET_KEY=supersecretjwtsecretkeychangeinproduction
@@ -73,7 +74,7 @@ RAZORPAY_KEY_SECRET=yourkeysecret
 
 ## 4. Docker Deployment
 
-We use Docker Compose to orchestrate frontend (React behind Nginx), backend (FastAPI), and SQLite database.
+We use Docker Compose to orchestrate frontend (React behind Nginx) and backend (FastAPI) connected to Neon Database (PostgreSQL).
 
 ### 4.1 Running with Docker Compose
 From the project root directory, run:

@@ -1,6 +1,6 @@
 # Database Schema - Campus Runner V1.0
 
-This document describes the database tables and columns used in the Campus Runner platform. We use SQLite for local development.
+This document describes the database tables and columns used in the Campus Runner platform. Neon Database (PostgreSQL) is used as the primary database engine.
 
 ---
 
