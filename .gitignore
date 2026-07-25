@@ -27,4 +27,12 @@ pnpm-debug.log*
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+# User Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Local Binary Tools / Executables
+sqlite-tools/
+*.exe
+
+
