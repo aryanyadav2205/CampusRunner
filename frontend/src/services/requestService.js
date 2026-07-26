@@ -1,4 +1,4 @@
-import { apiCall } from "./api";
+import { apiCall, API_BASE_URL } from "./api";
 
 export async function createRequest(requestData) {
   return apiCall("/requests", "POST", requestData);
@@ -46,7 +46,7 @@ export async function uploadImage(file) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch("http://localhost:8000/api/upload", {
+  const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
     headers,
     body: formData,

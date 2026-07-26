@@ -91,3 +91,53 @@ This will launch:
 Nginx maps incoming requests:
 - `/` -> serves React index.html and assets.
 - `/api/` -> proxies to `http://backend:8000/api/`.
+
+---
+
+## 5. Render Cloud Deployment
+
+Render (`render.com`) is a fully managed cloud platform suitable for hosting both the FastAPI backend and React frontend.
+
+### Option A: Automatic 1-Click Deployment (Render Blueprint)
+
+1. Push your repository code to GitHub or GitLab.
+2. Log into your [Render Dashboard](https://dashboard.render.com/).
+3. Click **New +** -> **Blueprint**.
+4. Connect your repository.
+5. Render will automatically detect the `render.yaml` file in the root directory and set up two services:
+   - `campusrunner-api`: FastAPI Web Service.
+   - `campusrunner-web`: Vite Static Site.
+6. Click **Apply**. Render will build and deploy both services automatically!
+
+### Option B: Manual Setup via Render Web Dashboard
+
+#### 1. Deploy Backend Web Service
+1. On Render Dashboard, click **New +** -> **Web Service**.
+2. Connect your Git repository.
+3. Configure settings:
+   - **Name**: `campusrunner-api`
+   - **Root Directory**: `backend`
+   - **Environment**: `Python 3`
+   - **Build Command**: `python -m pip install --upgrade pip && pip install --prefer-binary -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add Environment Variables:
+   - `PYTHON_VERSION`: `3.11.9`
+   - `DATABASE_URL`: `sqlite:///./campus_runner.db` (or PostgreSQL URI from Render Postgres)
+   - `SECRET_KEY`: (generate a secure random string)
+5. Click **Create Web Service**. Note the deployed URL (e.g., `https://campusrunner-api.onrender.com`).
+
+#### 2. Deploy Frontend Static Site
+1. Click **New +** -> **Static Site**.
+2. Connect your Git repository.
+3. Configure settings:
+   - **Name**: `campusrunner-web`
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
+4. Add Environment Variable:
+   - `VITE_API_BASE_URL`: `https://campusrunner-api.onrender.com/api` (Replace with your actual backend URL + `/api`)
+5. Under **Redirects / Rewrites**, add a rewrite rule:
+   - **Source**: `/*`
+   - **Destination**: `/index.html`
+   - **Action**: `Rewrite`
+6. Click **Create Static Site**.

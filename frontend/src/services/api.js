@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8000/api";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 export async function apiCall(endpoint, method = "GET", body = null, token = null) {
   // If token is not passed, attempt to grab it from local storage
