@@ -118,7 +118,7 @@ Render (`render.com`) is a fully managed cloud platform suitable for hosting bot
    - **Name**: `campusrunner-api`
    - **Root Directory**: `backend`
    - **Environment**: `Python 3`
-   - **Build Command**: `python -m pip install --upgrade pip && pip install --prefer-binary -r requirements.txt`
+   - **Build Command**: `python -m pip install --upgrade pip && export CARGO_HOME=/tmp/cargo && pip install --only-binary=:all: -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 4. Add Environment Variables:
    - `PYTHON_VERSION`: `3.11.9`
